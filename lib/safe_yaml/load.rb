@@ -159,7 +159,7 @@ module SafeYAML
       else
         # Ruby pukes on 1.9.2 if we try to open an empty file w/ 'r:bom|utf-8';
         # so we'll not specify those flags here. This mirrors the behavior for
-        # unsafe_load_file so it's probably preferable anyway.
+        # safe_yaml_unsafe_load_file so it's probably preferable anyway.
         self.load File.open(filename), nil, options
       end
     end

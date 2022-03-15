@@ -12,7 +12,7 @@ module YAML
       safe_load(*arguments)
     else
       arguments << filename if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
-      unsafe_load(*arguments)
+      safe_yaml_unsafe_load(*arguments)
     end
   end
 
@@ -21,7 +21,7 @@ module YAML
     if safe_mode == :safe
       safe_load_file(file, options_for_safe_load(options))
     else
-      unsafe_load_file(file)
+      safe_yaml_unsafe_load_file(file)
     end
   end
 
@@ -34,20 +34,20 @@ module YAML
   end
 
   if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
-    def self.unsafe_load_file(filename)
+    def self.safe_yaml_unsafe_load_file(filename)
       # https://github.com/tenderlove/psych/blob/v1.3.2/lib/psych.rb#L296-298
-      File.open(filename, 'r:bom|utf-8') { |f| self.unsafe_load(f, filename) }
+      File.open(filename, 'r:bom|utf-8') { |f| self.safe_yaml_unsafe_load(f, filename) }
     end
 
   else
-    def self.unsafe_load_file(filename)
+    def self.safe_yaml_unsafe_load_file(filename)
       # https://github.com/tenderlove/psych/blob/v1.2.2/lib/psych.rb#L231-233
-      self.unsafe_load File.open(filename)
+      self.safe_yaml_unsafe_load File.open(filename)
     end
   end
 
   class << self
-    alias_method :unsafe_load, :load
+    alias_method :safe_yaml_unsafe_load, :load
     alias_method :load, :load_with_options
     alias_method :load_file, :load_file_with_options
 

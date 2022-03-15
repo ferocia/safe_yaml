@@ -24,21 +24,21 @@ describe YAML do
     SafeYAML.restore_defaults!
   end
 
-  describe "unsafe_load" do
+  describe "safe_yaml_unsafe_load" do
     if SafeYAML::YAML_ENGINE == "psych" && RUBY_VERSION >= "1.9.3"
       it "allows exploits through objects defined in YAML w/ !ruby/hash via custom :[]= methods" do
-        backdoor = YAML.unsafe_load("--- !ruby/hash:ExploitableBackDoor\nfoo: bar\n")
+        backdoor = YAML.safe_yaml_unsafe_load("--- !ruby/hash:ExploitableBackDoor\nfoo: bar\n")
         expect(backdoor).to be_exploited_through_setter
       end
 
       it "allows exploits through objects defined in YAML w/ !ruby/object via the :init_with method" do
-        backdoor = YAML.unsafe_load("--- !ruby/object:ExploitableBackDoor\nfoo: bar\n")
+        backdoor = YAML.safe_yaml_unsafe_load("--- !ruby/object:ExploitableBackDoor\nfoo: bar\n")
         expect(backdoor).to be_exploited_through_init_with
       end
     end
 
     it "allows exploits through objects w/ sensitive instance variables defined in YAML w/ !ruby/object" do
-      backdoor = YAML.unsafe_load("--- !ruby/object:ExploitableBackDoor\nfoo: bar\n")
+      backdoor = YAML.safe_yaml_unsafe_load("--- !ruby/object:ExploitableBackDoor\nfoo: bar\n")
       expect(backdoor).to be_exploited_through_ivars
     end
 
@@ -48,7 +48,7 @@ describe YAML do
       end
 
       it "effectively ignores the whitelist (since everything is whitelisted)" do
-        result = YAML.unsafe_load <<-YAML.unindent
+        result = YAML.safe_yaml_unsafe_load <<-YAML.unindent
           --- !ruby/object:OpenStruct 
           table: 
             :backdoor: !ruby/object:ExploitableBackDoor 
@@ -472,23 +472,23 @@ describe YAML do
     end
   end
 
-  describe "unsafe_load_file" do
+  describe "safe_yaml_unsafe_load_file" do
     if SafeYAML::YAML_ENGINE == "psych" && RUBY_VERSION >= "1.9.3"
       it "allows exploits through objects defined in YAML w/ !ruby/hash via custom :[]= methods" do
-        backdoor = YAML.unsafe_load_file "spec/exploit.1.9.3.yaml"
+        backdoor = YAML.safe_yaml_unsafe_load_file "spec/exploit.1.9.3.yaml"
         expect(backdoor).to be_exploited_through_setter
       end
     end
 
     if SafeYAML::YAML_ENGINE == "psych" && RUBY_VERSION >= "1.9.2"
       it "allows exploits through objects defined in YAML w/ !ruby/object via the :init_with method" do
-        backdoor = YAML.unsafe_load_file "spec/exploit.1.9.2.yaml"
+        backdoor = YAML.safe_yaml_unsafe_load_file "spec/exploit.1.9.2.yaml"
         expect(backdoor).to be_exploited_through_init_with
       end
     end
 
     it "allows exploits through objects w/ sensitive instance variables defined in YAML w/ !ruby/object" do
-      backdoor = YAML.unsafe_load_file "spec/exploit.1.9.2.yaml"
+      backdoor = YAML.safe_yaml_unsafe_load_file "spec/exploit.1.9.2.yaml"
       expect(backdoor).to be_exploited_through_ivars
     end
   end
@@ -551,8 +551,8 @@ describe YAML do
       context "when the :safe option is set to false" do
         let(:safe_mode) { false }
 
-        it "calls #unsafe_load if the :safe option is set to false" do
-          expect(YAML).to receive(:unsafe_load)
+        it "calls #safe_yaml_unsafe_load if the :safe option is set to false" do
+          expect(YAML).to receive(:safe_yaml_unsafe_load)
           YAML.load(*arguments)
         end
       end
@@ -586,7 +586,7 @@ describe YAML do
 
       it "defaults to unsafe mode if the :safe option is omitted" do
         silence_warnings do
-          expect(YAML).to receive(:unsafe_load)
+          expect(YAML).to receive(:safe_yaml_unsafe_load)
           YAML.load(*arguments)
         end
       end
@@ -625,8 +625,8 @@ describe YAML do
       YAML.load_file(filename, :safe => true)
     end
 
-    it "calls #unsafe_load_file if the :safe option is set to false" do
-      expect(YAML).to receive(:unsafe_load_file)
+    it "calls #safe_yaml_unsafe_load_file if the :safe option is set to false" do
+      expect(YAML).to receive(:safe_yaml_unsafe_load_file)
       YAML.load_file(filename, :safe => false)
     end
 
@@ -637,7 +637,7 @@ describe YAML do
 
       it "defaults to unsafe mode if the :safe option is omitted" do
         silence_warnings do
-          expect(YAML).to receive(:unsafe_load_file)
+          expect(YAML).to receive(:safe_yaml_unsafe_load_file)
           YAML.load_file(filename)
         end
       end
